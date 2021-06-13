@@ -94,10 +94,10 @@ public class LMatchSummary {
 //		String[] projects = {"webpack1", "electron", "habitica", "meteor", "Ghost", "serverless", "node", "react", "storybook", "pdf"};
 		String[] projects = {"atom", "webpack1", "electron", "node", "Ghost", "storybook", "pdf"};
 		for (String project: projects) {
-			if (!project.equals("atom")) continue;
-			String largestMatchTable = "em_largest_notest_" + project;
-			String patternTable = "em_largest_match_patternnotest_" + project;
-			String matchWithPatternTable = "em_largest_match_with_pattern_idnotest_" + project;
+			if (!project.equals("node")) continue;
+			String largestMatchTable = "em_largest_notest_revision_" + project;
+			String patternTable = "em_largest_match_final_revision_" + project;
+			String matchWithPatternTable = "em_largest_match_with_pattern_final_revision_" + project;
 			LMatchSummary summary = new LMatchSummary(largestMatchTable, patternTable, matchWithPatternTable);
 			summary.execute();
 		}

@@ -119,6 +119,7 @@ public class ChangeExtracterClient2 {
 			}
 		} catch (Exception e) {
 			System.out.println("This is too big");
+			e.printStackTrace();
 		}
 		return cfList;
 	}

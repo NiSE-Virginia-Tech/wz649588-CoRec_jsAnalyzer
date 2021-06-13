@@ -21,10 +21,13 @@ import java.util.Set;
 
 import wekaPre.CommitOrder;
 import wekaPre.RosePrediction;
+import wekaPre.TARMAQPrediction;
+import wekaPre.TransARPrediction;
 
 
 public class TestChange2 {
-	static boolean executeFromFirstBug = true;
+	static String repoPath = "/Users/zijianjiang/test-repos";
+	static boolean executeFromFirstBug = false;
 	public static String editScriptTable;
 	static boolean goon = false;
 	static int amdFiles = 0;
@@ -42,6 +45,7 @@ public class TestChange2 {
 	public static String thisVersion;
 	static String roseTable = null;
 	static String afPredictTable = null;
+	
 	
 	private static boolean checkFileMissing(String filePath) {
 		File from = new File(filePath + "/from");
@@ -98,10 +102,9 @@ public class TestChange2 {
 	
 	
 	
-	public static void mainNode(String[] args) throws Exception {	
+	public static void main(String[] args) throws Exception {	
 		int[] count = new int[1000];
 		int[] typeChangeCount = new int[12];
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override
@@ -119,7 +122,7 @@ public class TestChange2 {
 //			cfCommitTable = "cfCommit_" + folder;
 //			avCommitTable = "avCommit_" + folder;
 //			
-			editScriptTable = "classify_graphmerge_final_" + folder;
+			editScriptTable = "classify_graphmerge_final_revision_" + folder;
 			if(!folder.equals("node")) continue;
 //			afcfTable = "afcfData2_" + folder;
 //			cfcfTable = "cfcfData2_" + folder;
@@ -202,7 +205,7 @@ public class TestChange2 {
 			});
 			System.out.println(commitDirectory.length);
 			int i = 0;
-			for(i = 0; i < commitDirectory.length; i++) {
+			for(i = 1664; i < commitDirectory.length; i++) {
 				System.out.println(i + "/" + commitDirectory.length);
 				String commit = commitDirectory[i];
 //				if (!commit.equals("8444bba") && !goon) continue;
@@ -288,8 +291,8 @@ public class TestChange2 {
 		}
 	}
 	
+	
 	public static void mainRoseOthers(String[] args) throws Exception {
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override
@@ -299,11 +302,13 @@ public class TestChange2 {
 		});
 		for(String folder : directories) {
 			System.out.println(folder);
-			if(!folder.matches("electron|serverless|Ghost|habitica|pdf|webpack1|react|storybook|meteor")) continue;
 			
-			afPredictTable = "avPredictRose_" + folder;
+			if(!folder.matches("pdf|serverless|Ghost|habitica|webpack1|react|meteor")) continue;
+			//if(!folder.equals("pdf")) continue;
+			//afPredictTable = "avPredictRose_" + folder;
+			afPredictTable = "avPredictTransAR_" + folder;
 			afCommitTable = "avCommit_" + folder;
-			RosePrediction.commitOrderTable = "commit_order_" + folder;
+			TransARPrediction.commitOrderTable = "commit_order_" + folder;
 			roseTable = "af_rose_" + folder;
 			Connection conn = SqliteManager.getConnection();
 			Statement stmt = conn.createStatement();
@@ -363,7 +368,6 @@ public class TestChange2 {
 	
 	
 	public static void mainFromDataOthers(String[] args) throws Exception {
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override
@@ -450,15 +454,15 @@ public class TestChange2 {
 		
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void mainOthers(String[] args) throws Exception {
 		String[] projects = new String[]{"pdf","meteor","habitica","node","serverless","webpack1","react","Ghost"};
 		String[] patterns = new String[]{"av", "af", "cf"};
 		for (String pattern : patterns) {
-			if (!pattern.equals("cf")) continue;
+			if (!pattern.equals("av")) continue;
 			double[] wa = new double[4];
 			int totalTask = 0;
 			for (String project : projects) {
-				String table = pattern + "PredictRose_" + project;
+				String table = pattern + "PredictTransAR_" + project;
 				System.out.println(table);
 				Connection conn = SqliteManager.getConnection();
 				Statement stmt = conn.createStatement();
@@ -512,7 +516,6 @@ public class TestChange2 {
 	}
 	
 	public static void mainRoseNode(String[] args) throws Exception {
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override
@@ -524,9 +527,9 @@ public class TestChange2 {
 			System.out.println(folder);
 			if(!folder.matches("node")) continue;
 			String commitsFolder = repoPath + "/" + folder + "/" + folder + "-commits";
-			afPredictTable = "cfPredictRose_" + folder;
-			afCommitTable = "cfCommit_" + folder;
-			RosePrediction.commitOrderTable = "commit_order_" + folder;
+			afPredictTable = "avPredictTransAR_" + folder;
+			afCommitTable = "avCommit_" + folder;
+			TransARPrediction.commitOrderTable = "commit_order_" + folder;
 			roseTable = "af_rose_" + folder;
 			Connection conn = SqliteManager.getConnection();
 			Statement stmt = conn.createStatement();
@@ -585,7 +588,6 @@ public class TestChange2 {
 	public static void mainNodeData(String[] args) throws Exception {
 		RosePrediction.commitOrderTable = "commit_order_node";
 		roseTable = "af_rose_node";
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override
@@ -686,7 +688,6 @@ public class TestChange2 {
 			stmt.close();
 			conn.close();
 			
-			String repoPath = "/Users/zijianjiang/test-repos";
 			String commitsFolder = repoPath + "/" + project + "/" + project + "-commits";
 			File commitsFile = new File(commitsFolder);
 			String[] commitDirectory = commitsFile.list(new FilenameFilter() {
@@ -746,7 +747,6 @@ public class TestChange2 {
 				
 		int[] count = new int[1000];
 		int[] typeChangeCount = new int[12];
-		String repoPath = "/Users/zijianjiang/test-repos";
 		File repos = new File(repoPath);
 		String[] directories = repos.list(new FilenameFilter() {
 		  @Override

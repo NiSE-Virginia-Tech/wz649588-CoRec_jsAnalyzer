@@ -108,7 +108,7 @@ public class GitMiner {
 			System.out.println(i);
 			commitHash = commit.getName();
 			message = commit.getFullMessage();
-			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
+//			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
 			if(message.toLowerCase().contains("typo")) continue;
 			String gitDir = projectPath + "/" + ".git";
 			String showCommand = "git --git-dir=" + gitDir  + " show " + commitHash;
@@ -145,14 +145,14 @@ public class GitMiner {
 			System.out.println(counter);
 			commitHash = commit.getName();
 			message = commit.getFullMessage();
-			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
+//			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
 //			int issueId = getIssueId(message);
 //			it's not a bugfix
 //			if(issueId == -1 && !bugfix.matcher(message.toLowerCase()).find()) {
 //				continue;
 //			}
 //			delete typo
-			if(message.toLowerCase().contains("typo")) continue;
+//			if(message.toLowerCase().contains("typo")) continue;
 ////			it's a duplicate bugfix
 //			if(issueId != -1 && !issueSet.add(issueId)) continue;
 //			
@@ -245,7 +245,7 @@ public class GitMiner {
 		});
 		
 		for(String folder : directories) {
-			if(!"freeCodeCamppdf".contains(folder)) continue;
+			if(!"node".contains(folder)) continue;
 //			String web = null;
 //			for(String repo : projects) {
 //				String[] split = repo.split("/");
