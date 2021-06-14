@@ -37,14 +37,16 @@ import vt.edu.graph.ClientVar;
 import vt.edu.graph.ReferenceEdge;
 import vt.edu.graph.ReferenceNode;
 import wekaPre.RosePrediction;
+import wekaPre.TARMAQPrediction;
+import wekaPre.TransARPrediction;
 
 public class ConnectChanges {
-	List<ChangeFact> cfList;
+	List<ChangeFactNode> cfList;
 	static String bugName;
 	List<TraverseJsonTyped> oldTJ;
 	Map<ClientFunc, TraverseJsonTyped> afToOldTJ = new HashMap<>();
 	Map<ClientVar, TraverseJsonTyped> avToOldTJ = new HashMap<>();
-	public void groupChanges(List<ChangeFact> cfList, String bugName, List<TraverseJsonTyped> oldTJ) {
+	public void groupChanges(List<ChangeFactNode> cfList, String bugName, List<TraverseJsonTyped> oldTJ) {
 		this.cfList = cfList;
 		this.bugName = bugName;
 		this.oldTJ = oldTJ;
@@ -86,7 +88,7 @@ public class ConnectChanges {
 //		Map<ClientFunc, TraverseJsonTyped> afToOldTJ = new HashMap<>();
 //		Map<ClientVar, TraverseJsonTyped> avToOldTJ = new HashMap<>();
 		
-		for (ChangeFact cf : cfList) {
+		for (ChangeFactNode cf : cfList) {
 			
 			for (Pair<ClientFunc, ClientFunc> p : cf.changedFuncs) {
 				f1 = p.fst;
@@ -347,10 +349,10 @@ public class ConnectChanges {
 			DirectedSparseGraph<ReferenceNode, ReferenceEdge> jung = impactGraphs.get(i);
 			Graph<ReferenceNode, ReferenceEdge> jgrapht = convertJungToJGraphT(jung);
 //			for (ReferenceNode node : jgrapht.vertexSet()) {
-//				if (node.type != ReferenceNode.CF)
+//				if (node.type != ReferenceNode.AV)
 //					continue;
-//				ClientFunc af = (ClientFunc) node.ref;
-//				Set<ClientFunc> cfs = buildAfDataset(node, jgrapht);
+//				ClientVar af = (ClientVar) node.ref;
+//				Set<ClientFunc> cfs = buildAvDataset(node, jgrapht);
 //				if (cfs == null) continue;
 //				Set<ClientFunc> candidateSet = new HashSet<>();
 //				
@@ -384,8 +386,8 @@ public class ConnectChanges {
 //				}
 ////				if it's af or av then afOldTJ(change 5 places)
 //				else {
-////					if (afOldTJ != null){
-//					if (afTJ != null) {
+//					if (afOldTJ != null){
+//					//if (afTJ != null) {
 //						Map<String, ITree> nameToITree = afTJ.nameToITree;
 //						Map<String, ITree> typedNameToITree = afTJ.typedNameToITree;
 //						for (String func : afTJ.funcSet) {
@@ -394,12 +396,12 @@ public class ConnectChanges {
 //						}
 //					}
 //				}
-//				boolean useRose = true;
+//				boolean useRose = false;
 //				if (cfs.size() >= 2) {
 //					for (ClientFunc usedFunc : cfs) {
 //						List<String> evidenceMethods = new ArrayList<>();
 //						evidenceMethods.add(usedFunc.sig);
-//						List<String> roseResult = RosePrediction.execute(evidenceMethods, TestChange2.roseTable, bugName);
+//						List<String> roseResult = TransARPrediction.execute(evidenceMethods, TestChange2.roseTable, bugName);
 //						Set<String> truePositives = new HashSet<>();
 //						Set<String> falsePositives = new HashSet<>();
 //						Set<String> falseNegatives = new HashSet<>();
@@ -468,234 +470,234 @@ public class ConnectChanges {
 			 * Important for AF_CF data extracting
 			 */
 //			/* Important for ML data extracting
-			/*
-			for (ReferenceNode node: jgrapht.vertexSet()) {
-				if (node.type != ReferenceNode.AF)
-					continue;
-				Set<ClientFunc> cfs = buildAfDataset(node, jgrapht);
-				if (cfs == null)
-					continue;
-				TestChange2.afSet.add(TestChange2.thisVersion + "++" + bugName);
-				ClientFunc af = (ClientFunc) node.ref;
-				String afSig = af.getSignature();
-//				AFPredictionDataset.put(afSig, cfs);
-				for (ClientFunc cf1 : cfs) {
-					for (ClientFunc cf2 : cfs) {
-						if (cf1.equals(cf2)) continue;
-						if (af.tJroot.isNodeJs) writeDataAFCFNode(af, cf1, cf2, true);
-						else writeDataAFCF(af, cf1, cf2, true);
-					}
-					TraverseJsonTyped afTJ = af.tJroot;
-					TraverseJsonTyped afOldTJ = afToOldTJ.get(af);
-					
-					if (afTJ.isExportEntity.contains(af.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
-										else writeDataAFCFNode(af, cf1, candidate, false);
-									}
-								}
-							}
-						}
-						
-					}
-					else if (afTJ.isPureExportEntity.contains(af.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								if (tJ.jsFilePath.equals(afTJ.jsFilePath)) continue;
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
-										else writeDataAFCFNode(af, cf1, candidate, false);
-									}
-								}
-							}
-						}
-					}
-					else {
-						if (afOldTJ != null){
-							Map<String, ITree> nameToITree = afOldTJ.nameToITree;
-							Map<String, ITree> typedNameToITree = afOldTJ.typedNameToITree;
-							for (String func : afOldTJ.funcSet) {
-								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), afOldTJ.jsFilePath, afOldTJ);
-								if (!cfs.contains(candidate)) {
-									if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
-									else writeDataAFCFNode(af, cf1, candidate, false);
-								}
-							}
-						}
-					}
-				}	
-			}
-			
-			*/
-//			cf_cf data extracting
-			/*
-			
-			for (ReferenceNode node: jgrapht.vertexSet()) {
-				if (node.type != ReferenceNode.CF)
-					continue;
-				Set<ClientFunc> cfs = buildAfDataset(node, jgrapht);
-				if (cfs == null)
-					continue;
-				List<ClientFunc> cfsList = new ArrayList<ClientFunc>(cfs);
-				
-				TestChange2.cfSet.add(TestChange2.thisVersion + "++" + bugName);
-				ClientFunc cf = (ClientFunc) node.ref;
-				String cfSig = cf.getSignature();
-//				AFPredictionDataset.put(afSig, cfs);
-//				for (int j = 0; j < cfsList.size(); j++){
-//					ClientFunc cf1 = cfsList.get(j);
-//					for (int k = j + 1; k < cfsList.size(); k++) {
-//						ClientFunc  cf2 = cfsList.get(k);
+//			
+//			for (ReferenceNode node: jgrapht.vertexSet()) {
+//				if (node.type != ReferenceNode.AF)
+//					continue;
+//				Set<ClientFunc> cfs = buildAfDataset(node, jgrapht);
+//				if (cfs == null)
+//					continue;
+//				TestChange2.afSet.add(TestChange2.thisVersion + "++" + bugName);
+//				ClientFunc af = (ClientFunc) node.ref;
+//				String afSig = af.getSignature();
+////				AFPredictionDataset.put(afSig, cfs);
+//				for (ClientFunc cf1 : cfs) {
+//					for (ClientFunc cf2 : cfs) {
+//						if (cf1.equals(cf2)) continue;
+//						if (af.tJroot.isNodeJs) writeDataAFCFNode(af, cf1, cf2, true);
+//						else writeDataAFCF(af, cf1, cf2, true);
+//					}
+//					TraverseJsonTyped afTJ = af.tJroot;
+//					TraverseJsonTyped afOldTJ = afToOldTJ.get(af);
+//					
+//					if (afTJ.isExportEntity.contains(af.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
+//										else writeDataAFCFNode(af, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//						
+//					}
+//					else if (afTJ.isPureExportEntity.contains(af.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								if (tJ.jsFilePath.equals(afTJ.jsFilePath)) continue;
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
+//										else writeDataAFCFNode(af, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						if (afOldTJ != null){
+//							Map<String, ITree> nameToITree = afOldTJ.nameToITree;
+//							Map<String, ITree> typedNameToITree = afOldTJ.typedNameToITree;
+//							for (String func : afOldTJ.funcSet) {
+//								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), afOldTJ.jsFilePath, afOldTJ);
+//								if (!cfs.contains(candidate)) {
+//									if (!af.tJroot.isNodeJs) writeDataAFCF(af, cf1, candidate, false);
+//									else writeDataAFCFNode(af, cf1, candidate, false);
+//								}
+//							}
+//						}
+//					}
+//				}	
+//			}
+//			
+////			*/
+////			cf_cf data extracting
+//			
+//			
+//			for (ReferenceNode node: jgrapht.vertexSet()) {
+//				if (node.type != ReferenceNode.CF)
+//					continue;
+//				Set<ClientFunc> cfs = buildAfDataset(node, jgrapht);
+//				if (cfs == null)
+//					continue;
+//				List<ClientFunc> cfsList = new ArrayList<ClientFunc>(cfs);
+//				
+//				TestChange2.cfSet.add(TestChange2.thisVersion + "++" + bugName);
+//				ClientFunc cf = (ClientFunc) node.ref;
+//				String cfSig = cf.getSignature();
+////				AFPredictionDataset.put(afSig, cfs);
+////				for (int j = 0; j < cfsList.size(); j++){
+////					ClientFunc cf1 = cfsList.get(j);
+////					for (int k = j + 1; k < cfsList.size(); k++) {
+////						ClientFunc  cf2 = cfsList.get(k);
+////						if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, cf2, true);
+////						else writeDataCFCFNode(cf, cf1, cf2, true);
+////					}
+//				
+//				for (ClientFunc cf1 : cfs) {
+//					for (ClientFunc cf2 : cfs) {
+//						if (cf1.equals(cf2)) continue;
 //						if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, cf2, true);
 //						else writeDataCFCFNode(cf, cf1, cf2, true);
 //					}
-				
-				for (ClientFunc cf1 : cfs) {
-					for (ClientFunc cf2 : cfs) {
-						if (cf1.equals(cf2)) continue;
-						if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, cf2, true);
-						else writeDataCFCFNode(cf, cf1, cf2, true);
-					}
-					TraverseJsonTyped cfTJ = cf.tJroot;
-					
-					if (cfTJ.isExportEntity.contains(cf.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
-										else writeDataCFCFNode(cf, cf1, candidate, false);
-									}
-								}
-							}
-						}
-						
-					}
-					else if (cfTJ.isPureExportEntity.contains(cf.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								if (tJ.jsFilePath.equals(cfTJ.jsFilePath)) continue;
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
-										else writeDataCFCFNode(cf, cf1, candidate, false);
-									}
-								}
-							}
-						}
-					}
-					else {
-						if (cfTJ != null){
-							Map<String, ITree> nameToITree = cfTJ.nameToITree;
-							Map<String, ITree> typedNameToITree = cfTJ.typedNameToITree;
-							for (String func : cfTJ.funcSet) {
-								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), cfTJ.jsFilePath, cfTJ);
-								if (!cfs.contains(candidate)) {
-									if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
-									else writeDataCFCFNode(cf, cf1, candidate, false);
-								}
-							}
-						}
-					}
-				}	
-			}
-			*/
-			
-			/*
-			 * Important avcf
-			 */
+//					TraverseJsonTyped cfTJ = cf.tJroot;
+//					
+//					if (cfTJ.isExportEntity.contains(cf.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
+//										else writeDataCFCFNode(cf, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//						
+//					}
+//					else if (cfTJ.isPureExportEntity.contains(cf.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								if (tJ.jsFilePath.equals(cfTJ.jsFilePath)) continue;
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
+//										else writeDataCFCFNode(cf, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						if (cfTJ != null){
+//							Map<String, ITree> nameToITree = cfTJ.nameToITree;
+//							Map<String, ITree> typedNameToITree = cfTJ.typedNameToITree;
+//							for (String func : cfTJ.funcSet) {
+//								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), cfTJ.jsFilePath, cfTJ);
+//								if (!cfs.contains(candidate)) {
+//									if (!cf.tJroot.isNodeJs) writeDataCFCF(cf, cf1, candidate, false);
+//									else writeDataCFCFNode(cf, cf1, candidate, false);
+//								}
+//							}
+//						}
+//					}
+//				}	
+//			}
+////			*/
+//			
 //			/*
-			/*
-			for (ReferenceNode node: jgrapht.vertexSet()) {
-				if (node.type != ReferenceNode.AV)
-					continue;
-				Set<ClientFunc> cfs = buildAvDataset(node, jgrapht);
-				if (cfs == null)
-					continue;
-				TestChange2.avSet.add(TestChange2.thisVersion + "++" + bugName);
-				ClientVar av = (ClientVar) node.ref;
-				String avSig = av.getSignature();
-//				AFPredictionDataset.put(afSig, cfs);
-				for (ClientFunc cf1 : cfs) {
-					for (ClientFunc cf2 : cfs) {
-						if (cf1.equals(cf2)) continue;
-						if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, cf2, true);
-						else writeDataAVCFNode(av, cf1, cf2, true);
-					}
-					TraverseJsonTyped avTJ = av.tJroot;
-					TraverseJsonTyped avOldTJ = avToOldTJ.get(av);
-					
-					if (avTJ.isExportEntity.contains(av.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
-										else writeDataAVCFNode(av, cf1, candidate, false);
-									}
-								}
-							}
-						}
-						
-					}
-					else if (avTJ.isPureExportEntity.contains(av.name)) {
-						if (oldTJ != null) {
-							for (TraverseJsonTyped tJ : oldTJ) {
-								if (tJ.jsFilePath.equals(avTJ.jsFilePath)) continue;
-								Map<String, ITree> nameToITree = tJ.nameToITree;
-								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
-								for (String func : tJ.funcSet) {
-									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
-									if (!cfs.contains(candidate)) {
-										if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
-										else writeDataAVCFNode(av, cf1, candidate, false);
-									}
-								}
-							}
-						}
-					}
-					else {
-						if (avOldTJ != null){
-							Map<String, ITree> nameToITree = avOldTJ.nameToITree;
-							Map<String, ITree> typedNameToITree = avOldTJ.typedNameToITree;
-							for (String func : avOldTJ.funcSet) {
-								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), avOldTJ.jsFilePath, avOldTJ);
-								if (!cfs.contains(candidate)) {
-									if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
-									else writeDataAVCFNode(av, cf1, candidate, false);
-								}
-							}
-						}
-					}
-				}	
-			}
-			*/
+//			 * Important avcf
+//			 */
+////			/*
+//			
+//			for (ReferenceNode node: jgrapht.vertexSet()) {
+//				if (node.type != ReferenceNode.AV)
+//					continue;
+//				Set<ClientFunc> cfs = buildAvDataset(node, jgrapht);
+//				if (cfs == null)
+//					continue;
+//				TestChange2.avSet.add(TestChange2.thisVersion + "++" + bugName);
+//				ClientVar av = (ClientVar) node.ref;
+//				String avSig = av.getSignature();
+////				AFPredictionDataset.put(afSig, cfs);
+//				for (ClientFunc cf1 : cfs) {
+//					for (ClientFunc cf2 : cfs) {
+//						if (cf1.equals(cf2)) continue;
+//						if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, cf2, true);
+//						else writeDataAVCFNode(av, cf1, cf2, true);
+//					}
+//					TraverseJsonTyped avTJ = av.tJroot;
+//					TraverseJsonTyped avOldTJ = avToOldTJ.get(av);
+//					
+//					if (avTJ.isExportEntity.contains(av.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
+//										else writeDataAVCFNode(av, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//						
+//					}
+//					else if (avTJ.isPureExportEntity.contains(av.name)) {
+//						if (oldTJ != null) {
+//							for (TraverseJsonTyped tJ : oldTJ) {
+//								if (tJ.jsFilePath.equals(avTJ.jsFilePath)) continue;
+//								Map<String, ITree> nameToITree = tJ.nameToITree;
+//								Map<String, ITree> typedNameToITree = tJ.typedNameToITree;
+//								for (String func : tJ.funcSet) {
+//									ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), tJ.jsFilePath, tJ);
+//									if (!cfs.contains(candidate)) {
+//										if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
+//										else writeDataAVCFNode(av, cf1, candidate, false);
+//									}
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						if (avOldTJ != null){
+//							Map<String, ITree> nameToITree = avOldTJ.nameToITree;
+//							Map<String, ITree> typedNameToITree = avOldTJ.typedNameToITree;
+//							for (String func : avOldTJ.funcSet) {
+//								ClientFunc candidate = new ClientFunc(func, nameToITree.get(func), typedNameToITree.get(func), avOldTJ.jsFilePath, avOldTJ);
+//								if (!cfs.contains(candidate)) {
+//									if (!av.tJroot.isNodeJs) writeDataAVCF(av, cf1, candidate, false);
+//									else writeDataAVCFNode(av, cf1, candidate, false);
+//								}
+//							}
+//						}
+//					}
+//				}	
+//			}
+//			*/
 //			
 			/*
 			 * avcf ends here, the following are important to extract the data values
 			 */
 			
 			
-			
+//			
 			boolean storeNodes = true;
 			if (storeNodes) {
 				GraphDataWithNodesJson graphJson = new GraphDataWithNodesJson();

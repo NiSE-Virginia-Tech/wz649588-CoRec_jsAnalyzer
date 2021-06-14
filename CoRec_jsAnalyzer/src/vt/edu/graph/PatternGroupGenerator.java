@@ -16,9 +16,12 @@ public class PatternGroupGenerator {
 		String[] projects = {"meteor", "react","habitica","pdf","serverless","electron"
 				,"webpack1","storybook","Ghost","node"};
 		for (String project : projects) {
+			if(!project.equals("node")){
+				continue;
+			}
 			Set<String> set = new HashSet<>();
 			
-			String pattern_id_table = "em_largest_match_with_pattern_idnotest_" + project;
+			String pattern_id_table = "em_largest_match_with_pattern_final_revision_" + project;
 			Connection conn = SqliteManager.getConnection();
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT count(*) FROM " + pattern_id_table);

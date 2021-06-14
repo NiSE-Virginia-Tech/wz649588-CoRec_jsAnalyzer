@@ -125,7 +125,7 @@ public class GitMinerVersion {
 			System.out.println(i);
 			commitHash = commit.getName();
 			message = commit.getFullMessage();
-			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
+//			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
 //			if(message.toLowerCase().contains("typo")) continue;
 			String gitDir = projectPath + "/" + ".git";
 			String showCommand = "git --git-dir=" + gitDir  + " show " + commitHash;
@@ -163,7 +163,7 @@ public class GitMinerVersion {
 //			if (counter >= 1242) continue;
 			commitHash = commit.getName();
 			message = commit.getFullMessage();
-			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
+//			if(!bugfix.matcher(message.toLowerCase()).find()) continue;
 //			int issueId = getIssueId(message);
 //			it's not a bugfix
 //			if(issueId == -1 && !bugfix.matcher(message.toLowerCase()).find()) {
@@ -343,7 +343,7 @@ public class GitMinerVersion {
 		});
 		
 		for(String folder : directories) {
-			if(!folder.equals("material-ui")) continue;
+			if(!folder.equals("react")) continue;
 //			String web = null;
 //			for(String repo : projects) {
 //				String[] split = repo.split("/");

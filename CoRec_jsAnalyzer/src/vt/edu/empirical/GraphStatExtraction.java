@@ -240,16 +240,15 @@ public class GraphStatExtraction {
 	public static void main(String[] args) throws SQLException, IOException {
 		String[] projects = {"webpack1", "node", "meteor","habitica","react","electron","Ghost","pdf","serverless","storybook"};
 //		String[] projects = {"webpack", "electron", "freeCodeCamp", "meteor", "Ghost", "serverless", "nodejs", "pdf", "storybook", "three"};
-		
 		for (String project: projects) {
-//			if(!project.equals("nodejs") || !project.equals("meteor")) continue;
-			String graphTable = "classify_graphmerge_final_" + project;
-			String resultTable = "empirical_graph_stat_" + project;
-			String resultView1 = "empirical_view1_" + project;
-			String resultView2 = "empirical_view2_" + project;
-			String resultView3 = "empirical_view3_" + project;
-			String resultView4 = "empirical_view4_" + project;
-			String resultView5 = "empirical_view5_" + project;
+			if(!project.equals("node")) continue;
+			String graphTable = "classify_graphmerge_final_revision_" + project;
+			String resultTable = "empirical_graph_stat_revision_" + project;
+			String resultView1 = "empirical_view1_revision_" + project;
+			String resultView2 = "empirical_view2_revision_" + project;
+			String resultView3 = "empirical_view3_revision_" + project;
+			String resultView4 = "empirical_view4_revision_" + project;
+			String resultView5 = "empirical_view5_revision_" + project;
 			List<String> resultViews = Arrays.asList(resultView1, resultView2, resultView3, resultView4, resultView5);
 			GraphStatExtraction extraction = new GraphStatExtraction(graphTable, resultTable);
 			extraction.execute();
@@ -298,6 +297,9 @@ public class GraphStatExtraction {
 			String project = projects[i];
 //			if(!project.equals("nodejs")) continue;
 			String resultView1 = "empirical_view1_" + project;
+			if (project.equals("node")) {
+				resultView1 = "empirical_view1_revision_" + project;
+			}
 			
 			ResultSet rs = stmt.executeQuery("SELECT av,dv,cv,af,df,cf,ac,dc,cc,ae,de,ce FROM " + resultView1);
 			rs.next();
@@ -359,19 +361,19 @@ public class GraphStatExtraction {
 			
 		}
 		Path parentPath = Paths.get(parentFolder);
-		Path table1Path = parentPath.resolve("empirical_table1.csv");
+		Path table1Path = parentPath.resolve("empirical_table1_revision.csv");
 //		Files.write(table1Path, table1Data.toString().getBytes(), CREATE, TRUNCATE_EXISTING);
 		
-		Path table2Path = parentPath.resolve("empirical_table2.csv");
+		Path table2Path = parentPath.resolve("empirical_table2_revision.csv");
 //		Files.write(table2Path, table2Data.toString().getBytes(), CREATE, TRUNCATE_EXISTING);
 		
-		Path xlsxPath1 = parentPath.resolve("empirical_table1.xlsx");
+		Path xlsxPath1 = parentPath.resolve("empirical_table1_revision.xlsx");
 		OutputStream xlsxFile1 = Files.newOutputStream(xlsxPath1, CREATE, TRUNCATE_EXISTING);
 		workbook1.write(xlsxFile1);
 		xlsxFile1.close();
 //		((Closeable) workbook1).close();
 		
-		Path xlsxPath2 = parentPath.resolve("empirical_table2.xlsx");
+		Path xlsxPath2 = parentPath.resolve("empirical_table2_revision.xlsx");
 		OutputStream xlsxFile2 = Files.newOutputStream(xlsxPath2, CREATE, TRUNCATE_EXISTING);
 		workbook2.write(xlsxFile2);
 		xlsxFile2.close();
@@ -391,6 +393,9 @@ public class GraphStatExtraction {
 			StringBuilder table3Data = new StringBuilder();
 			table3Data.append("node_num,commit_num\n");
 			String resultView2 = "empirical_view2_" + project;
+			if (project.equals("node")) {
+				resultView2 = "empirical_view2_revision_" + project;
+			}
 			ResultSet rs = stmt.executeQuery("SELECT node_num,commit_num FROM " + resultView2);
 			int rowNum = 0;
 			while (rs.next()) {
@@ -405,10 +410,10 @@ public class GraphStatExtraction {
 				
 			}
 			rs.close();
-			Path table3Path = parentPath.resolve("empirical_table3_" + project + ".csv");;
+			Path table3Path = parentPath.resolve("empirical_table3_revision_" + project + ".csv");;
 //			Files.write(table3Path, table3Data.toString().getBytes(), CREATE, TRUNCATE_EXISTING);
 			
-			Path xlsxPath3 = parentPath.resolve("empirical_table3_" + project + ".xlsx");
+			Path xlsxPath3 = parentPath.resolve("empirical_table3_revision_" + project + ".xlsx");
 			OutputStream xlsxFile3 = Files.newOutputStream(xlsxPath3, CREATE, TRUNCATE_EXISTING);
 			workbook3.write(xlsxFile3);
 			xlsxFile3.close();
@@ -429,6 +434,9 @@ public class GraphStatExtraction {
 			StringBuilder table4Data = new StringBuilder();
 			table4Data.append("cdg_num,commit_num\n");
 			String resultView3 = "empirical_view3_" + project;
+			if (project.equals("node")) {
+				resultView3 = "empirical_view3_revision_" + project;
+			}
 			ResultSet rs = stmt.executeQuery("SELECT cdg_num,commit_num FROM " + resultView3);
 			int rowNum = 0;
 			while (rs.next()) {
@@ -442,10 +450,10 @@ public class GraphStatExtraction {
 				row4.createCell(1).setCellValue(commitNum);
 			}
 			rs.close();
-			Path table4Path = parentPath.resolve("empirical_table4_" + project + ".csv");
+			Path table4Path = parentPath.resolve("empirical_table4_revision_" + project + ".csv");
 //			Files.write(table4Path, table4Data.toString().getBytes(), CREATE, TRUNCATE_EXISTING);
 			
-			Path xlsxPath4 = parentPath.resolve("empirical_table4_" + project + ".xlsx");
+			Path xlsxPath4 = parentPath.resolve("empirical_table4_revision_" + project + ".xlsx");
 			OutputStream xlsxFile4 = Files.newOutputStream(xlsxPath4, CREATE, TRUNCATE_EXISTING);
 			workbook4.write(xlsxFile4);
 			xlsxFile4.close();

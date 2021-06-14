@@ -93,9 +93,9 @@ public class LMatchPatternExtraction {
 		
 		for (String project: projects) {
 			System.out.println(project);
-//			if (!project.equals("atom")) continue;
-			String largestMatchTable = "em_largest_final_" + project;
-			String patternTable = "em_largest_match_final_" + project;
+			if (!project.equals("node")) continue;
+			String largestMatchTable = "em_largest_notest_revision_" + project;
+			String patternTable = "em_largest_match_final_revision_" + project;
 			LMatchPatternExtraction extraction = new LMatchPatternExtraction(largestMatchTable, patternTable);
 			extraction.execute();
 		}

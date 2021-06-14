@@ -29,20 +29,20 @@ import com.google.gson.Gson;
 
 import vt.edu.sql.SqliteManager;
 
-public class LMatchFinder {
+public class LMatchFinderN {
 private boolean executeFromScratch;
 	
 	private String editScriptTable;
 	
 	private String largestMatchTable;
 	
-	public LMatchFinder(String editScriptTable, String largestMatchTable, boolean executeFromScratch) {
+	public LMatchFinderN(String editScriptTable, String largestMatchTable, boolean executeFromScratch) {
 		this.editScriptTable = editScriptTable;
 		this.largestMatchTable = largestMatchTable;
 		this.executeFromScratch = executeFromScratch;
 	}
 	
-	public LMatchFinder(String editScriptTable, String largestMatchTable) {
+	public LMatchFinderN(String editScriptTable, String largestMatchTable) {
 		this(editScriptTable, largestMatchTable, true);
 	}
 	
@@ -82,11 +82,17 @@ private boolean executeFromScratch;
 		
 		if (executeFromScratch)
 			stmt.executeUpdate("DROP TABLE IF EXISTS " + largestMatchTable);
-		
+		/*
 		stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + largestMatchTable
 				+ " (bn1 TEXT, gn1 INTEGER,"
 				+ "bn2 TEXT, gn2 INTEGER, graph1 TEXT, graph2 TEXT,subgraph1 TEXT,"
 				+ "subgraph2 TEXT, node_num INTEGER, edge_num INTEGER)");
+				*/
+		
+		stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + largestMatchTable
+				+ " (bn1 TEXT, gn1 INTEGER,"
+				+ "bn2 TEXT, gn2 INTEGER, bn3 TEXT, gn3 INTEGER, graph1 TEXT, graph2 TEXT, graph3 TEXT, subgraph1 TEXT,"
+				+ "subgraph2 TEXT, subgraph3 TEXT, node_num INTEGER, edge_num INTEGER)");
 		
 		String bugNameQuery = "SELECT DISTINCT bug_name FROM " + editScriptTable;
 		ResultSet rs = stmt.executeQuery(bugNameQuery);
@@ -97,11 +103,9 @@ private boolean executeFromScratch;
 		
 		stmt.close();
 		conn.close();
-		int total_rows = 3000;
 		
 		System.out.println("Total: " + bugNameList.size());
-//		for (int i = 0; i < bugNameList.size(); i++) {
-		for (int i = 0; i < total_rows; i++) {
+		for (int i = 0; i < bugNameList.size(); i++) {
 			
 			System.out.println("########" + (i + 1) + "/" + bugNameList.size());
 			
@@ -114,8 +118,7 @@ private boolean executeFromScratch;
 				if (g1.vertexSet().size() <= 1) // only check a graph with more than 1 node
 					continue;
 				Set<GraphPair> matchesForG1 = new HashSet<>();
-//				for (int j = 0; j < bugNameList.size(); j++) {
-				for (int j = 0; j < total_rows; j++) {
+				for (int j = 0; j < bugNameList.size(); j++) {
 					if (i == j) continue;
 					String bugName2 = bugNameList.get(j);
 					List<Graph<GraphNode, GraphEdge>> graphList2 = getCommitGraphList(bugName2);
@@ -123,10 +126,25 @@ private boolean executeFromScratch;
 						Graph<GraphNode, GraphEdge> g2 = graphList2.get(graphNum2);
 						if (g2.vertexSet().size() <= 1)
 							continue;
-						Set<GraphPair> clonedMatches = new HashSet<>(matchesForG1);
-						boolean timeOut = isTimeOut(new MatchExtraction(clonedMatches, g1, g2, bugName1, bugName2, graphNum1, graphNum2), 15);
-						if (!timeOut)
-							matchesForG1 = clonedMatches;
+						Set<GraphPair> clonedMatches1 = new HashSet<>(matchesForG1);
+						boolean timeOut = isTimeOut(new MatchExtraction(clonedMatches1, g1, g2, bugName1, bugName2, graphNum1, graphNum2), 15);
+						//if (!timeOut)
+							//matchesForG1 = clonedMatches1;
+					}
+					
+					for (int k = 0; k < bugNameList.size(); k++) {
+						if (i == k || j == k) continue;
+						String bugName3 = bugNameList.get(k);
+						List<Graph<GraphNode, GraphEdge>> graphList3 = getCommitGraphList(bugName3);
+						for (int graphNum3 = 0; graphNum3 < graphList3.size(); graphNum3++) {
+							Graph<GraphNode, GraphEdge> g3 = graphList3.get(graphNum3);
+							if (g3.vertexSet().size() <= 1)
+								continue;
+							Set<GraphPair> clonedMatches2 = new HashSet<>(matchesForG1);
+							boolean timeOut = isTimeOut(new MatchExtraction(clonedMatches2, g1, g3, bugName1, bugName3, graphNum1, graphNum3), 15);
+							//if (!timeOut)
+								//matchesForG1 = clonedMatches;
+						}
 					}
 					
 				}
@@ -147,9 +165,9 @@ private boolean executeFromScratch;
 //		String[] projects = {"node", "pdf", "webpack1", "electron", "Ghost", "storybook"};
 		for (String project: projects) {
 			System.out.println(project);
-			if (!project.equals("node")) continue;
-			String editScriptTable = "classify_graphmerge_final_revision_" + project;
-			String largestMatchTable = "em_largest_notest_revision_1" + project;
+//			if (!project.equals("atom")) continue;
+			String editScriptTable = "classify_graphmerge_final_" + project;
+			String largestMatchTable = "em_largest_notest_" + project;
 			LMatchFinder finder = new LMatchFinder(editScriptTable, largestMatchTable, true);
 			finder.execute();
 		}

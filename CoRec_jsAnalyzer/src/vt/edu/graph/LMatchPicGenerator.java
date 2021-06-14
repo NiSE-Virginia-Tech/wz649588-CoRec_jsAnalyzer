@@ -32,7 +32,7 @@ private String project;
 	
 	public LMatchPicGenerator(String project) {
 		this.project = project;
-		this.patternPicDir = "/Users/zijianjiang/Documents/NaM/characterization/patterns3/largestPatternPic_" + project;
+		this.patternPicDir = "/Users/zijianjiang/Documents/NaM/characterization/patterns3/largestPatternPic_revision_" + project;
 		
 	}
 	
@@ -68,7 +68,7 @@ private String project;
 		Connection conn = SqliteManager.getConnection();
 		Statement stmt = conn.createStatement();
 		
-		String patternTable =  "em_largest_match_patternnotest_" + project;
+		String patternTable =  "em_largest_match_final_revision_" + project;
 		
 		Gson gson = new Gson();
 		ResultSet rs = stmt.executeQuery("SELECT pattern_id, shape FROM " + patternTable);
@@ -84,7 +84,7 @@ private String project;
 			
 		}
 		
-		String collapsedTable = "em_largest_match_collapsednotest_" + project;
+		String collapsedTable = "em_largest_match_collapsednotest_revision_" + project;
 		rs = stmt.executeQuery("SELECT collapsed_id, collapsed_shape FROM "
 				+ collapsedTable + " WHERE collapsed_shape IS NOT NULL");
 		Set<String> uniqueIdSet = new HashSet<>();
@@ -107,7 +107,7 @@ private String project;
 		String[] projects = {"atom", "webpack1", "electron", "node", "Ghost", "storybook", "pdf"};
 		for (String project: projects) {
 			System.out.println(project);
-			if (!project.equals("atom")) continue;
+			if (!project.equals("node")) continue;
 			LMatchPicGenerator picGeneration = new LMatchPicGenerator(project);
 			picGeneration.execute();
 		}

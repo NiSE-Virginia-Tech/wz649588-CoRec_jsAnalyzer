@@ -15,7 +15,7 @@ public class TraverseJsonTyped {
 	Set<String> prototypeSet = new HashSet<>();
 //	jsFilePath should be in the form of package1++package2++name.js
 	boolean isAMD = false;
-	boolean isNodeJs = false;
+	boolean isNodeJs = true;
 	
 	String jsFilePath;
 	ITree jsonTree;
